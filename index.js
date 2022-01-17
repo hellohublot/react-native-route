@@ -1,6 +1,7 @@
 
 import React, { Component } from 'react'
 import { View, StyleSheet, NativeModules, NativeEventEmitter, requireNativeComponent, UIManager, findNodeHandle, processColor, Platform, DeviceEventEmitter } from 'react-native'
+import HTNavigationBar from './HTNavigationBar'
 
 const HTRouteEventManagerEmitter = new NativeEventEmitter(NativeModules.HTRouteEventManager)
 
@@ -230,4 +231,5 @@ module.exports = {
 	HTRouteManager,
 	HTRouteComponent,
 	HTRouteView,
+	HTNavigationBar
 }
