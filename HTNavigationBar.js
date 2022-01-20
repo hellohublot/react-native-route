@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { View, Text, SafeAreaView, StyleSheet, Animated, Dimensions, StatusBar } from 'react-native'
 import PropTypes from 'prop-types'
 
-const { SCREEN_WIDTH: width, SCREEN_HEIGHT: height } = Dimensions.get('window')
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 const isIOSFullScreen = (SCREEN_WIDTH == 375 && SCREEN_HEIGHT == 812) 
 	|| (SCREEN_WIDTH == 414 && SCREEN_HEIGHT == 896)
 	|| (SCREEN_WIDTH == 360 && SCREEN_HEIGHT == 780)

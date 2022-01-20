@@ -12,6 +12,11 @@
 #import <SKIOSNetworkPlugin/SKIOSNetworkAdapter.h>
 #import <FlipperKitReactPlugin/FlipperKitReactPlugin.h>
 
+#import <RNReactNativeRoute/HTRouteBridgeManager.h>
+#import <RNReactNativeRoute/HTRouteController.h>
+#import <RNReactNativeRoute/UINavigationController+FDFullscreenPopGesture.h>
+#import <React/RCTConvert.h>
+
 static void InitializeFlipper(UIApplication *application) {
   FlipperClient *client = [FlipperClient sharedClient];
   SKDescriptorMapper *layoutDescriptorMapper = [[SKDescriptorMapper alloc] initWithDefaults];
@@ -31,20 +36,50 @@ static void InitializeFlipper(UIApplication *application) {
   InitializeFlipper(application);
 #endif
 
-  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
-  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge
-                                                   moduleName:@"ReactNativeDemo"
-                                            initialProperties:nil];
+  [HTRouteBridgeManager loadBridgeWithURL:[self sourceURLForBridge:nil] moduleName:@"ReactNativeDemo" launchOptions:launchOptions];
 
-  if (@available(iOS 13.0, *)) {
-      rootView.backgroundColor = [UIColor systemBackgroundColor];
-  } else {
-      rootView.backgroundColor = [UIColor whiteColor];
-  }
+  UITabBarController *tabBarController = [[UITabBarController alloc] init];
+  UIColor *tintColor = [RCTConvert UIColor:@(0xFF383C46)];
+  tabBarController.tabBar.backgroundColor = [UIColor whiteColor];
+  tabBarController.tabBar.tintColor = tintColor;
+  tabBarController.tabBar.translucent = true;
+
+  NSString *titleKey = @"title";
+  NSString *imageKey = @"image";
+  NSString *selectedImageKey = @"selectedImageKey";
+  NSString *componentKey = @"component";
+  NSArray *keyValueList = @[
+    @{ titleKey: @"Home", imageKey: @"tabbar_home", selectedImageKey: @"tabbar_home_selected", componentKey: @"Home" },
+    @{ titleKey: @"Mine", imageKey: @"tabbar_mine", selectedImageKey: @"tabbar_mine_selected", componentKey: @"Mine" },
+  ];
+  [keyValueList enumerateObjectsUsingBlock:^(NSDictionary *dictionary, NSUInteger index, BOOL * _Nonnull stop) {
+    HTRouteController *routeController = [HTRouteController controllerWithComponentName:dictionary[componentKey] componentRouteOptionList:@{@"id": [NSString stringWithFormat:@"%ld", index]}];
+    UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:routeController];
+    navigationController.fd_viewControllerBasedNavigationBarAppearanceEnabled = false;
+    [tabBarController addChildViewController:navigationController];
+
+    routeController.tabBarItem.title = dictionary[titleKey];
+    routeController.tabBarItem.image = [[UIImage imageNamed:dictionary[imageKey]] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    routeController.tabBarItem.selectedImage = [[UIImage imageNamed:dictionary[selectedImageKey]] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+    UIFont *font = [UIFont systemFontOfSize:9];
+    [routeController.tabBarItem setTitleTextAttributes:@{
+        NSFontAttributeName: font,
+        NSForegroundColorAttributeName: [RCTConvert UIColor:@(0xFF7E828A)]
+    } forState:UIControlStateNormal];
+    [routeController.tabBarItem setTitleTextAttributes:@{
+        NSFontAttributeName: font,
+        NSForegroundColorAttributeName: tintColor
+    } forState:UIControlStateSelected];
+
+  }];
+
+  UIViewController *rootViewController = [[UIViewController alloc] init];
+  rootViewController.view.backgroundColor = [UIColor whiteColor];
+  [rootViewController addChildViewController:tabBarController];
+  [rootViewController.view addSubview:tabBarController.view];
+  [tabBarController didMoveToParentViewController:rootViewController];
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  UIViewController *rootViewController = [UIViewController new];
-  rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
   return YES;

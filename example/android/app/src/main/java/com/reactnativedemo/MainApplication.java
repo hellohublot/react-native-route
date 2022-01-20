@@ -8,6 +8,8 @@ import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
+import com.hublot.route.HTRouteGlobal;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
@@ -45,6 +47,9 @@ public class MainApplication extends Application implements ReactApplication {
     super.onCreate();
     SoLoader.init(this, /* native exopackage */ false);
     initializeFlipper(this, getReactNativeHost().getReactInstanceManager());
+    HTRouteGlobal.application = this;
+    HTRouteGlobal.moduleName = "ReactNativeDemo";
+    getReactNativeHost().getReactInstanceManager().createReactContextInBackground();
   }
 
   /**

@@ -12,6 +12,7 @@
     "postinstall": "rm -rf ./node_modules/react-native-route/example"
   },
   "dependencies": {
+    "babel-plugin-root-import": "^6.6.0",
     "react": "17.0.2",
     "react-native": "0.66.0",
     "react-native-route": "../"
