@@ -21,6 +21,8 @@ if (Platform.OS == 'ios') {
 
 export default class HTNavigationBar extends Component {
 
+	static STATUS_BAR_HEIGHT = STATUS_BAR_HEIGHT
+
 	static propTypes = {
 		float: PropTypes.bool,
         leftItemList: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.element, PropTypes.number])),

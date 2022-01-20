@@ -8,10 +8,18 @@ export default class Detail extends Component {
 	static navigationOptions = ({ navigation }) => {
 		let backItemAction = navigation.getParam('backAction')
 		return {
+			backgroundStyle: { borderTopLeftRadius: 10, borderTopRightRadius: 10 },
+
 			statusHeight: 0,
 			headerBackgroundColor: 'turquoise',
+			contentStyle: {
+				height: 55
+			},
 			title: navigation.state.params['title'],
-			backgroundStyle: { borderTopLeftRadius: 10, borderTopRightRadius: 10 },
+			titleStyle: {
+				color: 'white',
+				fontSize: 18,
+			},
 			leftItemList: [
 				<HTRouteView style={{ paddingRight: 30, height: '100%', justifyContent: 'center' }}
 					routeData={navigation.createRouteData(backItemAction, 'Address')}
@@ -28,7 +36,7 @@ export default class Detail extends Component {
 		return (
 			<View style={styleList.container}>
 				<HTRouteView routeData={routeData}>
-					<Text style={styleList.itemTitle}>Tap Push A Address Page Again</Text>
+					<Text style={styleList.itemTitle}>Tap Push To Address Page Again</Text>
 				</HTRouteView>
 			</View>
 		)
@@ -46,7 +54,7 @@ const styleList = StyleSheet.create({
 	},
 	itemTitle: {
 		fontSize: 20,
-		color: '#333',
+		color: '#444',
 		textAlign: 'center',
 	}
 })
