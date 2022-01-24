@@ -9,9 +9,11 @@ const isIOSFullScreen = (SCREEN_WIDTH == 375 && SCREEN_HEIGHT == 812)
 	|| (SCREEN_WIDTH == 390 && SCREEN_HEIGHT == 844)
 	|| (SCREEN_WIDTH == 428 && SCREEN_HEIGHT == 926)
 let STATUS_BAR_HEIGHT = 0
+let HOME_BAR_HEIGHT = 0
 if (Platform.OS == 'ios') {
 	if (isIOSFullScreen) {
 		STATUS_BAR_HEIGHT = 44
+		HOME_BAR_HEIGHT = 34
 	} else {
 		STATUS_BAR_HEIGHT = 20
 	}
@@ -22,6 +24,8 @@ if (Platform.OS == 'ios') {
 export default class HTNavigationBar extends Component {
 
 	static STATUS_BAR_HEIGHT = STATUS_BAR_HEIGHT
+
+	static HOME_BAR_HEIGHT = HOME_BAR_HEIGHT
 
 	static propTypes = {
 		float: PropTypes.bool,
