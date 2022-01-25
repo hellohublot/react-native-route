@@ -46,7 +46,10 @@ public class HTRouteNavigationController extends HTRouteFragment {
     public void pushViewController(final HTRouteController controller, Boolean animated, final Callback complete) {
         final HTRouteController lastController = childControllerList.get(childControllerList.size() - 1);
         controller.hidesBottomBarWhenPushed = true;
-        HTRouteGlobal.nextController(getView(), HTRouteTabBarController.class).reloadShowTabBar(false);
+        HTRouteTabBarController tabBarController = HTRouteGlobal.nextController(getView(), HTRouteTabBarController.class);
+        if (tabBarController != null) {
+            tabBarController.reloadShowTabBar(false);
+        }
         addChildController(controller);
         translateAnimation(controller, controller.getView(), true, animated, new Callback() {
             @Override
@@ -93,7 +96,10 @@ public class HTRouteNavigationController extends HTRouteFragment {
         }
         final int index = childControllerList.indexOf(controller);
         if (index == 0) {
-            HTRouteGlobal.nextController(getView(), HTRouteTabBarController.class).reloadShowTabBar(true);
+            HTRouteTabBarController tabBarController = HTRouteGlobal.nextController(getView(), HTRouteTabBarController.class);
+            if (tabBarController != null) {
+                tabBarController.reloadShowTabBar(true);
+            }
         }
         final HTRouteController animatedController = childControllerList.get(childControllerList.size() - 1);
         translateAnimation(animatedController, animatedController.getView(), false, animated, new Callback() {
@@ -130,7 +136,6 @@ public class HTRouteNavigationController extends HTRouteFragment {
     }
 
     private void translateAnimation(final HTRouteController controller, final View view, final Boolean isPush, Boolean animated, final Callback complete) {
-        float width = getView().getWidth();
         float height = getView().getHeight() * ( isPush ? 0.3f : 0.7f );
         float fromYValue = isPush ? height : 0;
         float toYValue = isPush ? 0 : height;

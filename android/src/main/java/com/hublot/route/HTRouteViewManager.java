@@ -5,14 +5,11 @@ import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.TranslateAnimation;
+import android.view.animation.*;
 import android.widget.RelativeLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.UiThreadUtil;
-import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.*;
 import com.facebook.react.uimanager.PixelUtil;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -51,23 +48,6 @@ public class HTRouteViewManager extends ReactViewManager {
         return presentView;
     }
 
-    private static Rect packComponentEdgeList(Map<String, Serializable> componentEdgeList) {
-        if (componentEdgeList == null) {
-            return new Rect(0, 0, 0, 0);
-        }
-        return new Rect(
-                componentEdgeList.containsKey("left")
-                        ? (int) PixelUtil.toPixelFromDIP((Double) componentEdgeList.get("left"))
-                        : 0,
-                componentEdgeList.containsKey("top") ? (int) PixelUtil.toPixelFromDIP((Double) componentEdgeList.get("top")) : 0,
-                componentEdgeList.containsKey("right")
-                        ? (int) PixelUtil.toPixelFromDIP((Double) componentEdgeList.get("right"))
-                        : 0,
-                componentEdgeList.containsKey("bottom")
-                        ? (int) PixelUtil.toPixelFromDIP((Double) componentEdgeList.get("bottom"))
-                        : 0);
-    }
-
     public static void handlerRouteDataWithController(HTRouteController controller, @Nullable Map<String, Object> routeData) {
         String action = (String) routeData.get("action");
         if (action == null) {
@@ -81,6 +61,17 @@ public class HTRouteViewManager extends ReactViewManager {
         Map<String, Serializable> componentRouteOptionList = (Map<String, Serializable>) routeData.get("componentRouteOptionList");
         HTRouteNavigationController navigationController = HTRouteGlobal.nextController(controller.getView(), HTRouteNavigationController.class);
         HTRouteTabBarController tabBarController = HTRouteGlobal.nextController(controller.getView(), HTRouteTabBarController.class);
+
+        Double presentEdgeTop = (Double) componentRouteOptionList.get("presentEdgeTop");
+        if (presentEdgeTop == null) {
+            presentEdgeTop = (double) 0;
+        }
+        presentEdgeTop = (double) HTRouteGlobal.dp2px(presentEdgeTop.floatValue());
+        Double presentAnimatedDuration = (Double) componentRouteOptionList.get("presentAnimatedDuration");
+        if (presentAnimatedDuration == null) {
+            presentAnimatedDuration = (double)250;
+        }
+
         if (action.equals("push") || action.equals("navigate")) {
             if (action.equals("navigate")) {
                 for (HTRouteTabBarModel model: tabBarController.modelList) {
@@ -116,26 +107,81 @@ public class HTRouteViewManager extends ReactViewManager {
             RelativeLayout presentView = rootPresentViewController();
             HTRouteController routeController = new HTRouteController(componentName, componentRouteOptionList);
             routeController.hidesBottomBarWhenPushed = true;
-            HTRouteNavigationController presentNavigationController = new HTRouteNavigationController(routeController);
-            Map<String, Serializable> componentEdgeList = (Map<String, Serializable>) componentRouteOptionList.get("componentEdge");
-            Rect rect = packComponentEdgeList(componentEdgeList);
+            final HTRouteNavigationController presentNavigationController = new HTRouteNavigationController(routeController);
+            RelativeLayout presentBackgroundView = new RelativeLayout(HTRouteGlobal.activity);
+            Double presentBackgroundColor = (Double) componentRouteOptionList.get("presentBackgroundColor");
+            if (presentBackgroundColor == null) {
+                presentBackgroundColor = (double)0;
+            }
+            presentBackgroundView.setBackgroundColor(presentBackgroundColor.intValue());
+
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            layoutParams.setMargins(rect.left, rect.top, rect.right, rect.bottom);
-            presentView.addView(presentNavigationController.getView(), layoutParams);
-            presentNavigationController.viewDidAppear();
+            layoutParams.setMargins(0, presentEdgeTop.intValue(), 0, 0);
+            presentBackgroundView.addView(presentNavigationController.getView(), layoutParams);
+            presentView.addView(presentBackgroundView, HTRouteGlobal.matchParent);
+            translatePresentAnimation(presentBackgroundView, presentNavigationController.getView(), presentEdgeTop, true, presentAnimatedDuration, new Callback() {
+                @Override
+                public void invoke(Object... args) {
+                    presentNavigationController.viewDidAppear();
+                }
+            });
         } else if (action.equals("dismiss")) {
-            RelativeLayout presentView = rootPresentViewController();
+            final RelativeLayout presentView = rootPresentViewController();
             for (int i = 0; i < presentView.getChildCount(); i ++) {
-                View navigationControllerView = presentView.getChildAt(i);
-                HTRouteNavigationController presentNavigationController = HTRouteGlobal.nextController(navigationControllerView, HTRouteNavigationController.class);
+                final ViewGroup presentBackgroundView = (ViewGroup) presentView.getChildAt(i);
+                View navigationControllerView = presentBackgroundView.getChildAt(0);
+                final HTRouteNavigationController presentNavigationController = HTRouteGlobal.nextController(navigationControllerView, HTRouteNavigationController.class);
                 HTRouteController routeController = presentNavigationController.childControllerList.get(0);
                 if (routeController.componentName.equals(componentName)) {
-                    presentView.removeView(navigationControllerView);
-                    presentNavigationController.viewDidDisappear();
-                    presentNavigationController.dealloc();
+                    translatePresentAnimation(presentBackgroundView, presentNavigationController.getView(), presentEdgeTop, false, presentAnimatedDuration, new Callback() {
+                        @Override
+                        public void invoke(Object... args) {
+                            presentView.removeView(presentBackgroundView);
+                            presentNavigationController.viewDidDisappear();
+                            presentNavigationController.dealloc();
+                        }
+                    });
                 }
             }
         }
+    }
+
+    private static void translatePresentAnimation(View presentBackgroundView, View navigationControllerView, double presentEdgeTop, final Boolean isPresent, double animatedDuration, final Callback complete) {
+        float height = (float) (HTRouteGlobal.activity.getWindow().getDecorView().getHeight() - presentEdgeTop);
+        float fromYValue = isPresent ? height : 0;
+        float toYValue = isPresent ? 0 : height;
+        float duration = (float) animatedDuration;
+        int yDuration = (int) (duration * 0.7f);
+        float fromOpacityValue = isPresent ? 1f : 1;
+        float toOpacityValue = isPresent ? 1 : 0f;
+        int opacityDuration = (int) (duration * 0.9f);
+        if (animatedDuration <= 0) {
+            if (complete != null) {
+                complete.invoke();
+            }
+            return;
+        }
+
+        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, fromYValue, toYValue);
+        translateAnimation.setDuration(yDuration);
+        navigationControllerView.startAnimation(translateAnimation);
+
+        AlphaAnimation alphaAnimation = new AlphaAnimation(fromOpacityValue, toOpacityValue);
+        alphaAnimation.setDuration(opacityDuration);
+        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) { }
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if (complete != null) {
+                    complete.invoke();
+                }
+            }
+            @Override
+            public void onAnimationRepeat(Animation animation) { }
+        });
+        presentBackgroundView.startAnimation(alphaAnimation);
+
     }
 
     private void touchRouteData(@NonNull final HTRouteView routeView, @Nullable final Map<String, Object> routeData) {

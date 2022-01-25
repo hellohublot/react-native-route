@@ -66,12 +66,6 @@ public class HTRouteController extends HTRouteFragment implements HTRouteReactRo
         bundle.putString("componentName", componentName);
         bundle.putBundle("componentRouteOptionList", createBundleFromMap(componentRouteOptionList));
         rootView.bundle = bundle;
-        if (componentRouteOptionList != null) {
-            Double backgroundColor = (Double) componentRouteOptionList.get("backgroundColor");
-            if (backgroundColor != null) {
-                relativeLayout.setBackgroundColor(backgroundColor.intValue());
-            }
-        }
 
         rootView.setLayoutParams(HTRouteGlobal.matchParent);
         relativeLayout.addView(rootView);
@@ -148,5 +142,11 @@ public class HTRouteController extends HTRouteFragment implements HTRouteReactRo
     public void onContentAppearToReactInstance(HTRouteReactRootView rootView) {
         progressBar.setVisibility(View.INVISIBLE);
         getView().removeView(progressBar);
+        if (componentRouteOptionList != null) {
+            Double backgroundColor = (Double) componentRouteOptionList.get("backgroundColor");
+            if (backgroundColor != null) {
+                getView().setBackgroundColor(backgroundColor.intValue());
+            }
+        }
     }
 }

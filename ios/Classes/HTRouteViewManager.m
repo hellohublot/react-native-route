@@ -47,6 +47,13 @@ RCT_EXPORT_METHOD(touchRouteData:(nonnull NSNumber *)reactTag routeData:(NSDicti
     UINavigationController *navigationController = controller.navigationController;
     UITabBarController *tabBarController = controller.tabBarController;
 
+    CGFloat presentEdgeTop = [[componentRouteOptionList valueForKey:@"presentEdgeTop" defultValue:@(0)] doubleValue];
+    CGFloat presentAnimatedDuration = [[componentRouteOptionList valueForKey:@"presentAnimatedDuration" defultValue:@(250)] doubleValue];
+    if (!animated) {
+        presentAnimatedDuration = 0;
+    }
+    presentAnimatedDuration = presentAnimatedDuration / 1000.0;
+
 
     if ([action isEqualToString:@"push"] || [action isEqualToString:@"navigate"]) {
         if ([action isEqualToString:@"navigate"]) {
@@ -109,20 +116,27 @@ RCT_EXPORT_METHOD(touchRouteData:(nonnull NSNumber *)reactTag routeData:(NSDicti
         if (!routeController) {
             routeController = [HTRouteController controllerWithComponentName:componentName componentRouteOptionList:componentRouteOptionList];
         }
+        UIView *presentBackgroundView = [[UIView alloc] initWithFrame:CGRectZero];
+        presentBackgroundView.frame = rootPresentViewController.view.bounds;
+        [presentBackgroundView setUserInteractionEnabled:true];
+        presentBackgroundView.backgroundColor = [RCTConvert UIColor:[componentRouteOptionList valueForKey:@"presentBackgroundColor"]];
+
         UINavigationController *presentNavigationController = [[UINavigationController alloc] initWithRootViewController:routeController];
-        id componentEdgeValue = [componentRouteOptionList valueForKey:@"componentEdge"];
-        UIEdgeInsets componentEdge = componentEdgeValue ? [RCTConvert UIEdgeInsets:componentEdgeValue] : UIEdgeInsetsZero;
-        CGRect frame = [UIScreen mainScreen].bounds;
-        presentNavigationController.view.frame = CGRectMake(
-            componentEdge.left,
-            componentEdge.top,
-            frame.size.width - componentEdge.left - componentEdge.right,
-            frame.size.height - componentEdge.top - componentEdge.bottom
-        );
+        [presentBackgroundView addSubview:presentNavigationController.view];
+
+        CGSize backgroundSize = presentBackgroundView.bounds.size;
+        presentBackgroundView.layer.opacity = 0;
+        presentNavigationController.view.frame = CGRectMake(0, backgroundSize.height, backgroundSize.width, backgroundSize.height - presentEdgeTop);
+
 
         [rootPresentViewController addChildViewController:presentNavigationController];
-        [rootPresentViewController.view addSubview:presentNavigationController.view];
+        [rootPresentViewController.view addSubview:presentBackgroundView];
         [presentNavigationController didMoveToParentViewController:rootPresentViewController];
+
+        [UIView animateWithDuration:presentAnimatedDuration animations:^{
+            presentBackgroundView.layer.opacity = 1;
+            presentNavigationController.view.frame = CGRectMake(0, presentEdgeTop, backgroundSize.width, presentNavigationController.view.frame.size.height);
+        }];
     } else if ([action isEqualToString:@"dismiss"]) {
         UIViewController *rootPresentViewController = [self rootPresentViewController];
         for (UINavigationController *presentNavigationController in rootPresentViewController.childViewControllers) {
@@ -135,8 +149,13 @@ RCT_EXPORT_METHOD(touchRouteData:(nonnull NSNumber *)reactTag routeData:(NSDicti
             }
             HTRouteController *routeController = (HTRouteController *)viewController;
             if ([routeController.componentName isEqualToString:componentName]) {
-                [presentNavigationController removeFromParentViewController];
-                [presentNavigationController.view removeFromSuperview];
+                [UIView animateWithDuration:presentAnimatedDuration animations:^{
+                    presentNavigationController.view.superview.layer.opacity = 0;
+                    presentNavigationController.view.frame = CGRectMake(0, presentNavigationController.view.superview.bounds.size.height, presentNavigationController.view.frame.size.width, presentNavigationController.view.frame.size.height);
+                } completion:^(BOOL finished) {
+                    [presentNavigationController removeFromParentViewController];
+                    [presentNavigationController.view.superview removeFromSuperview];
+                }];
             }
         }
     }

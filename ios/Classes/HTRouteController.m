@@ -76,6 +76,11 @@ NSInteger idCount = 0;
     }
 }
 
+- (void)viewDidLayoutSubviews {
+    [super viewDidLayoutSubviews];
+    self.rootView.frame = self.view.bounds;
+}
+
 - (void)handlerRootViewDidAppear:(NSNotification *)notification {
     if (self.rootView != notification.object) {
         return;

@@ -35,6 +35,9 @@ public class HTRouteGlobal {
     public static <T> T nextController(View target, Class<T> cls) {
         View view = target;
         while (cls.isInstance(view.getTag()) == false) {
+            if (!(view.getParent() instanceof View)) {
+                return null;
+            }
             view = (View) view.getParent();
         }
         return (T) view.getTag();

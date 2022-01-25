@@ -26,7 +26,7 @@ export default class Home extends Component {
 				) },
 				{ title: 'Present To Address', routeData: navigation.createRouteData(
 					'present', 'Address', { 'title': 'Address Page', backAction: 'dismiss' }, 
-					{ presentEdgeTop: 200, presentBackgroundColor: processColor('rgba(0, 0, 0, 0.2)'), presentAnimatedDuration: 0.25, backgroundColor: processColor('clear') }
+					{ presentEdgeTop: 200, presentBackgroundColor: processColor('rgba(0, 0, 0, 0.2)'), presentAnimatedDuration: 250, backgroundColor: processColor('clear') }
 				) },
 			]
 		}

@@ -10,7 +10,7 @@
 
 ## Usage
 
-[点击查看完整示例 Example](./example/App.js)
+[点击查看完整示例 Example](./example/app/App.js)
 
 ```bash
 yarn add 'https://github.com/hellohublot/react-native-route.git'
