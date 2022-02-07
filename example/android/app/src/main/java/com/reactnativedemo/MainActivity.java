@@ -55,14 +55,6 @@ public class MainActivity extends ReactActivity {
                 new HTRouteNavigationController(new HTRouteController("Mine", createComponentRouteOption())))
         );
       }
-      @Override
-      public void cellForIndex(ViewGroup imageContainer, ImageView imageView, TextView textView, int index, boolean isSelected) {
-        super.cellForIndex(imageContainer, imageView, textView, index, isSelected);
-        HTRouteTabBarModel model = modelList.get(index);
-        textView.setText(model.title);
-        textView.setTextColor(isSelected ? 0xFF383C46 : 0xFF7E828A);
-        imageView.setImageResource(isSelected ? model.selectedImage : model.image);
-      }
     };
     setContentView(this.tabBarController.getView());
   }

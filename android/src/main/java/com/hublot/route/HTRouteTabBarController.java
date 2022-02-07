@@ -80,7 +80,10 @@ public class HTRouteTabBarController extends HTRouteFragment implements HTRouteT
 
     @Override
     public void cellForIndex(ViewGroup imageContainer, ImageView imageView, TextView textView, int index, boolean isSelected) {
-
+    	HTRouteTabBarModel model = modelList.get(index);
+        textView.setText(model.title);
+        textView.setTextColor(isSelected ? 0xFF383C46 : 0xFF7E828A);
+        imageView.setImageResource(isSelected ? model.selectedImage : model.image);
     }
 
     @Override
