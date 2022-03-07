@@ -9,6 +9,8 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactRootView;
 
+import java.lang.ref.WeakReference;
+
 public class HTRouteReactRootView extends ReactRootView {
 
     public Bundle bundle;
@@ -39,7 +41,12 @@ public class HTRouteReactRootView extends ReactRootView {
         void onContentAppearToReactInstance(HTRouteReactRootView rootView);
     }
 
-    public HTRouteReactRootViewEventListener routeEventListener;
+    public void dealloc() {
+        unmountReactApplication();
+        routeEventListener = null;
+    }
+
+    public WeakReference<HTRouteReactRootViewEventListener> routeEventListener;
 
     private Boolean hadContentAppear = false;
 
@@ -48,7 +55,7 @@ public class HTRouteReactRootView extends ReactRootView {
         super.onViewAdded(child);
         if (!hadContentAppear) {
             if (routeEventListener != null) {
-                routeEventListener.onContentAppearToReactInstance(this);
+                routeEventListener.get().onContentAppearToReactInstance(this);
             }
             hadContentAppear = true;
         }

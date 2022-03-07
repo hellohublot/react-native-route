@@ -16,13 +16,12 @@
 
 RCT_EXPORT_MODULE()
 
-+ (UITabBarController *)findTabBarController:(UIViewController *)controller {
-    UITabBarController *tabBarController = controller.tabBarController;
-    if (tabBarController) {
-        return tabBarController;
++ (UIViewController *)findController:(UIViewController *)controller controllerClass:(Class)controllerClass {
+    if ([controller isKindOfClass:controllerClass]) {
+        return controller;
     }
     for (UIViewController *childController in controller.childViewControllers) {
-        UITabBarController *findController = [self findTabBarController:childController];
+        UIViewController *findController = [self findController:childController controllerClass:controllerClass];
         if (findController) {
             return findController;
         }
@@ -30,21 +29,19 @@ RCT_EXPORT_MODULE()
     return nil;
 }
 
-+ (UIViewController *)findFromController {
-    UIViewController *rootController = [UIApplication sharedApplication].keyWindow.rootViewController;
-    UITabBarController *tabBarController = [[self class] findTabBarController:rootController];
-    UINavigationController *navigationController = tabBarController.selectedViewController;
-    UIViewController *controller = navigationController.visibleViewController;
-    return controller;
-}
-
 + (void)handlerRouteDataToController:(UIViewController *)toController routeData:(NSDictionary *)routeData {
     RCTExecuteOnMainQueue(^{
-        UIViewController *fromController = [self findFromController];
-        if (!fromController) {
+        UIViewController *rootController = [UIApplication sharedApplication].keyWindow.rootViewController;
+        UITabBarController *tabBarController = (UITabBarController *)[[self class] findController:rootController controllerClass:[UITabBarController class]];
+        UINavigationController *navigationController = tabBarController.selectedViewController;
+        if (tabBarController == nil) {
+            navigationController = (UINavigationController *)[[self class] findController:rootController controllerClass:[UINavigationController class]];
+        }
+        UIViewController *controller = navigationController.visibleViewController;
+        if (!controller) {
             return;
         }
-        [HTRouteViewManager handlerRouteDataWithController:fromController toController:toController routeData:routeData];
+        [HTRouteViewManager handlerRouteDataWithController:controller toController:toController routeData:routeData];
     });
 }
 

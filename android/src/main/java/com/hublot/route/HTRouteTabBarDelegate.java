@@ -9,7 +9,7 @@ public interface HTRouteTabBarDelegate {
 
     public int itemCount();
 
-    public void cellForIndex(ViewGroup imageContainer, ImageView imageView, TextView textView, int index, boolean isSelected);
+    public void cellForIndex(ViewGroup container, TextView button, ViewGroup imageContainer, ImageView imageView, TextView textView, int index, boolean isSelected);
 
     public boolean shouldItemSelected(int index);
 

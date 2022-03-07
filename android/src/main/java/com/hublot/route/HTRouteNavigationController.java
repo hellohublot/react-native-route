@@ -1,18 +1,28 @@
 package com.hublot.route;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.os.Build;
+import android.telecom.Call;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.*;
 import android.widget.RelativeLayout;
 import com.facebook.react.bridge.Callback;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.view.View.ALPHA;
+import static android.view.View.TRANSLATION_Y;
 
 public class HTRouteNavigationController extends HTRouteFragment {
 
     public List<HTRouteController> childControllerList = new ArrayList<>();
+
+    private Boolean lock = false;
 
     public HTRouteNavigationController(HTRouteController rootController) {
         addChildController(rootController);
@@ -44,6 +54,10 @@ public class HTRouteNavigationController extends HTRouteFragment {
     }
 
     public void pushViewController(final HTRouteController controller, Boolean animated, final Callback complete) {
+        if (this.lock) {
+            return;
+        }
+        this.lock = true;
         final HTRouteController lastController = childControllerList.get(childControllerList.size() - 1);
         controller.hidesBottomBarWhenPushed = true;
         HTRouteTabBarController tabBarController = HTRouteGlobal.nextController(getView(), HTRouteTabBarController.class);
@@ -56,15 +70,17 @@ public class HTRouteNavigationController extends HTRouteFragment {
             public void invoke(Object... args) {
                 controller.viewDidAppear();
                 lastController.viewDidDisappear();
+                lastController.getView().setVisibility(View.GONE);
                 if (complete != null) {
                     complete.invoke();
                 }
+                lock = false;
             }
         });
     }
 
-    public void replaceViewController(final HTRouteController controller, Boolean animated) {
-        if (childControllerList.size() <= 1) {
+    public void replaceViewController(HTRouteController controller, Boolean animated) {
+        if (childControllerList.size() <= 0) {
             return;
         }
         pushViewController(controller, animated, new Callback() {
@@ -94,14 +110,19 @@ public class HTRouteNavigationController extends HTRouteFragment {
         if (childControllerList.size() <= 1) {
             return;
         }
+        if (this.lock) {
+            return;
+        }
+        this.lock = true;
         final int index = childControllerList.indexOf(controller);
+        final HTRouteController animatedController = childControllerList.get(childControllerList.size() - 1);
         if (index == 0) {
             HTRouteTabBarController tabBarController = HTRouteGlobal.nextController(getView(), HTRouteTabBarController.class);
             if (tabBarController != null) {
                 tabBarController.reloadShowTabBar(true);
             }
         }
-        final HTRouteController animatedController = childControllerList.get(childControllerList.size() - 1);
+        controller.getView().setVisibility(View.VISIBLE);
         translateAnimation(animatedController, animatedController.getView(), false, animated, new Callback() {
             @Override
             public void invoke(Object... args) {
@@ -116,6 +137,7 @@ public class HTRouteNavigationController extends HTRouteFragment {
                 for (HTRouteController removeController: willRemoveControllerList) {
                     removeChildController(removeController);
                 }
+                lock = false;
             }
         });
     }
@@ -135,50 +157,53 @@ public class HTRouteNavigationController extends HTRouteFragment {
         controller.dealloc();
     }
 
-    private void translateAnimation(final HTRouteController controller, final View view, final Boolean isPush, Boolean animated, final Callback complete) {
-        float height = getView().getHeight() * ( isPush ? 0.3f : 0.7f );
+    private void translateAnimation(HTRouteController controller, View view, Boolean isPush, final Boolean animated, final Callback complete) {
+        float height = getView().getHeight();
         float fromYValue = isPush ? height : 0;
         float toYValue = isPush ? 0 : height;
-        float duration = 250f;
-        int yDuration = (int) (duration * 0.7f);
-        float fromOpacityValue = isPush ? 1f : 1;
-        float toOpacityValue = isPush ? 1 : 0f;
-        int opacityDuration = (int) (duration * 0.9f);
-        if (!animated) {
+        long duration = 350;
+        float fromOpacityValue = isPush ? 0f : 1;
+        float toOpacityValue = isPush ? 1 : 0;
+
+        if (!animated || Build.VERSION.SDK_INT <= Build.VERSION_CODES.HONEYCOMB) {
             if (complete != null) {
                 complete.invoke();
             }
             return;
         }
-        AnimationSet animationList = new AnimationSet(true);
+
+        final AnimatorSet animationList = new AnimatorSet();
         if (isPush) {
-            animationList.setInterpolator(new AccelerateDecelerateInterpolator());
+            animationList.setInterpolator(new DecelerateInterpolator());
         }
 
+        ObjectAnimator translateAnimation = ObjectAnimator.ofFloat(view, TRANSLATION_Y, fromYValue, toYValue);
+        translateAnimation.setDuration(duration);
 
+        ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(view, ALPHA, fromOpacityValue, toOpacityValue);
+        alphaAnimation.setDuration(duration);
+        animationList.playTogether(translateAnimation, alphaAnimation);
+        alphaAnimation.addListener(new Animator.AnimatorListener() {
 
-        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, fromYValue, toYValue);
-        translateAnimation.setDuration(yDuration);
-        animationList.addAnimation(translateAnimation);
-
-        AlphaAnimation alphaAnimation = new AlphaAnimation(fromOpacityValue, toOpacityValue);
-        alphaAnimation.setDuration(opacityDuration);
-        animationList.addAnimation(alphaAnimation);
-
-        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) { }
+            public void onAnimationStart(Animator animator) {
+            }
             @Override
-            public void onAnimationEnd(Animation animation) {
+            public void onAnimationEnd(Animator animator) {
                 if (complete != null) {
                     complete.invoke();
                 }
             }
             @Override
-            public void onAnimationRepeat(Animation animation) { }
+            public void onAnimationCancel(Animator animator) {
+            }
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+            }
         });
+
         animationList.setDuration((long) duration);
-        view.startAnimation(animationList);
+        animationList.start();
 
     }
 

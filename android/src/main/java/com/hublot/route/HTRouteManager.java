@@ -17,32 +17,23 @@ public class HTRouteManager extends ReactContextBaseJavaModule {
         return "HTRouteManager";
     }
 
-    private HTRouteTabBarController findTabBarController(ViewGroup viewGroup) {
-        if (viewGroup.getTag() instanceof HTRouteTabBarController) {
-            return (HTRouteTabBarController) viewGroup.getTag();
-        }
-        for (int index = 0; index < viewGroup.getChildCount(); index ++) {
-            View view = viewGroup.getChildAt(index);
-            if (view instanceof ViewGroup) {
-                HTRouteTabBarController tabBarController = findTabBarController((ViewGroup) view);
-                if (tabBarController != null) {
-                    return tabBarController;
-                }
-            }
-        }
-        return null;
-    }
-
     @ReactMethod()
     public void route(final ReadableMap routeData) {
         UiThreadUtil.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 ViewGroup rootView = (ViewGroup) HTRouteGlobal.activity.getWindow().getDecorView();
-                HTRouteTabBarController tabBarController = findTabBarController(rootView);
-                HTRouteNavigationController navigationController = (HTRouteNavigationController) tabBarController.findSelectedFragment();
-                HTRouteController controller = navigationController.childControllerList.get(0);
-                HTRouteViewManager.handlerRouteDataWithController(controller, routeData.toHashMap());
+                HTRouteTabBarController tabBarController = HTRouteGlobal.lastController(rootView, HTRouteTabBarController.class);
+                HTRouteNavigationController navigationController = null;
+                if (tabBarController != null) {
+                    navigationController = (HTRouteNavigationController) tabBarController.findSelectedFragment();
+                } else {
+                    navigationController = HTRouteGlobal.lastController(rootView, HTRouteNavigationController.class);
+                }
+                if (navigationController != null) {
+                    HTRouteController controller = navigationController.childControllerList.get(0);
+                    HTRouteViewManager.handlerRouteDataWithController(controller, routeData.toHashMap());
+                }
             }
         });
     }

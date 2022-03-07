@@ -63,6 +63,16 @@ NSInteger idCount = 0;
     self.fd_interactiveDistance = [RCTConvert CGFloat:[self.componentRouteOptionList valueForKey:@"gestureResponseDistance" defultValue:@(30)]];
 
     self.view.backgroundColor = [RCTConvert UIColor:[self.componentRouteOptionList valueForKey:@"backgroundColor"]];
+    NSString *backgroundImage = [self.componentRouteOptionList valueForKey:@"backgroundImage"];
+    if (backgroundImage) {
+        UIImageView *backgroundImageView = [[UIImageView alloc] initWithFrame:self.view.bounds];
+        backgroundImageView.contentMode = UIViewContentModeScaleAspectFill;
+        UIImage *image = [UIImage imageNamed:backgroundImage];
+        backgroundImageView.image = image;
+        [self.view addSubview:backgroundImageView];
+    }
+
+
     if ([RCTConvert BOOL:[self.componentRouteOptionList valueForKey:@"showLoading" defultValue:@(true)]]) {
         [self.view addSubview:self.indicatorView];
         self.indicatorView.center = self.view.center;

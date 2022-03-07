@@ -1,7 +1,10 @@
 package com.hublot.route;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.Rect;
+import android.os.Build;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +22,11 @@ import com.facebook.react.views.view.ReactViewGroup;
 import com.facebook.react.views.view.ReactViewManager;
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.Map;
+
+import static android.view.View.ALPHA;
+import static android.view.View.TRANSLATION_Y;
 
 public class HTRouteViewManager extends ReactViewManager {
 
@@ -37,7 +44,7 @@ public class HTRouteViewManager extends ReactViewManager {
     }
 
     private static RelativeLayout rootPresentViewController() {
-        ViewGroup rootView = (ViewGroup) HTRouteGlobal.activity.getWindow().getDecorView().findViewById(android.R.id.content);
+        ViewGroup rootView = (ViewGroup) HTRouteGlobal.activity.getWindow().getDecorView();
         int id = 1000001;
         RelativeLayout presentView = (RelativeLayout)rootView.findViewById(id);
         if (presentView == null) {
@@ -155,32 +162,37 @@ public class HTRouteViewManager extends ReactViewManager {
         float fromOpacityValue = isPresent ? 1f : 1;
         float toOpacityValue = isPresent ? 1 : 0f;
         int opacityDuration = (int) (duration * 0.9f);
-        if (animatedDuration <= 0) {
+        if (duration <= 0 || Build.VERSION.SDK_INT <= Build.VERSION_CODES.HONEYCOMB) {
             if (complete != null) {
                 complete.invoke();
             }
             return;
         }
 
-        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0, fromYValue, toYValue);
+        ObjectAnimator translateAnimation = ObjectAnimator.ofFloat(navigationControllerView, TRANSLATION_Y, fromYValue, toYValue);
         translateAnimation.setDuration(yDuration);
-        navigationControllerView.startAnimation(translateAnimation);
+        translateAnimation.start();
 
-        AlphaAnimation alphaAnimation = new AlphaAnimation(fromOpacityValue, toOpacityValue);
+        ObjectAnimator alphaAnimation = ObjectAnimator.ofFloat(presentBackgroundView, ALPHA, fromOpacityValue, toOpacityValue);
         alphaAnimation.setDuration(opacityDuration);
-        alphaAnimation.setAnimationListener(new Animation.AnimationListener() {
+        alphaAnimation.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animation animation) { }
+            public void onAnimationStart(Animator animator) {
+            }
             @Override
-            public void onAnimationEnd(Animation animation) {
+            public void onAnimationEnd(Animator animator) {
                 if (complete != null) {
                     complete.invoke();
                 }
             }
             @Override
-            public void onAnimationRepeat(Animation animation) { }
+            public void onAnimationCancel(Animator animator) {
+            }
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+            }
         });
-        presentBackgroundView.startAnimation(alphaAnimation);
+        alphaAnimation.start();
 
     }
 
@@ -195,14 +207,15 @@ public class HTRouteViewManager extends ReactViewManager {
     }
 
     @ReactProp(name = "routeData")
-    public void setRouteData(final HTRouteView routeView, ReadableMap routeDataMap) {
+    public void setRouteData(HTRouteView routeView, ReadableMap routeDataMap) {
         final Map<String, Object> routeData = routeDataMap == null ? null : routeDataMap.toHashMap();
         if (routeData != null && routeData.size() > 0) {
             routeView.setClickable(true);
+            final WeakReference<HTRouteView> weakRouteView = new WeakReference<>(routeView);
             routeView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    touchRouteData(routeView, routeData);
+                    touchRouteData(weakRouteView.get(), routeData);
                 }
             });
         } else {

@@ -1,28 +1,19 @@
 package com.hublot.route;
 
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.ColorFilter;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
-import com.facebook.react.ReactRootView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.uimanager.RootView;
-import com.facebook.react.views.view.ReactViewBackgroundDrawable;
-import com.facebook.react.views.view.ReactViewGroup;
+
 
 import java.io.Serializable;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,24 +49,41 @@ public class HTRouteController extends HTRouteFragment implements HTRouteReactRo
     @Override
     protected ViewGroup createViewGroup() {
         RelativeLayout relativeLayout = new RelativeLayout(HTRouteGlobal.activity);
-        relativeLayout.setClipChildren(true);
+        relativeLayout.setClipChildren(false);
+        Double backgroundColor = (Double) componentRouteOptionList.get("backgroundColor");
+        if (backgroundColor != null) {
+            relativeLayout.setBackgroundColor(backgroundColor.intValue());
+        }
+
+        String backgroundImage = (String)componentRouteOptionList.get("backgroundImage");
+        if (backgroundImage != null) {
+            relativeLayout.setBackgroundResource(HTRouteGlobal.activity.getResources().getIdentifier(backgroundImage, "mipmap", HTRouteGlobal.activity.getPackageName()));
+        }
 
         rootView = new HTRouteReactRootView(HTRouteGlobal.activity);
-        rootView.routeEventListener = this;
+        rootView.routeEventListener = new WeakReference<HTRouteReactRootView.HTRouteReactRootViewEventListener>(this);
         Bundle bundle = new Bundle();
         bundle.putString("componentName", componentName);
         bundle.putBundle("componentRouteOptionList", createBundleFromMap(componentRouteOptionList));
         rootView.bundle = bundle;
 
         rootView.setLayoutParams(HTRouteGlobal.matchParent);
-        relativeLayout.addView(rootView);
+        rootView.startReactRootView();
 
-        Object showLoadingValue = componentRouteOptionList.get("showLoading");
+        Boolean lazyRenderValue = (Boolean)componentRouteOptionList.get("lazyRender");
+        if (lazyRenderValue == null) {
+            lazyRenderValue = false;
+        }
+        if (!lazyRenderValue) {
+            relativeLayout.addView(rootView);
+        }
+
+        Boolean showLoadingValue = (Boolean) componentRouteOptionList.get("showLoading");
         if (showLoadingValue == null) {
             showLoadingValue = true;
         }
         progressBar = new ProgressBar(HTRouteGlobal.activity);
-        if ((Boolean)showLoadingValue) {
+        if (showLoadingValue) {
             progressBar.setVisibility(View.VISIBLE);
         } else {
             progressBar.setVisibility(View.INVISIBLE);
@@ -87,14 +95,6 @@ public class HTRouteController extends HTRouteFragment implements HTRouteReactRo
         ((RelativeLayout.LayoutParams)(progressBar.getLayoutParams())).addRule(RelativeLayout.CENTER_IN_PARENT);
         relativeLayout.addView(progressBar);
 
-        Object lazyRenderValue = componentRouteOptionList.get("lazyRender");
-        if (lazyRenderValue == null) {
-        	lazyRenderValue = false;
-        }
-        if (!((Boolean)lazyRenderValue)) {
-        	rootView.startReactRootView();
-        }
-
         return relativeLayout;
     }
 
@@ -102,21 +102,18 @@ public class HTRouteController extends HTRouteFragment implements HTRouteReactRo
 
     @Override
     public void dealloc() {
-        rootView.unmountReactApplication();
-        rootView.routeEventListener = null;
-        super.dealloc();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
         this.sendNotificationWithActionName("dealloc", null);
+        super.dealloc();
+        rootView.dealloc();
+        rootView = null;
     }
 
     @Override
     public void viewDidAppear() {
         if (!isSecondAppear) {
-            rootView.startReactRootView();
+            if (rootView.getParent() == null) {
+                getView().addView(rootView, 0);
+            }
         }
         Map<String, Object> valueList = new HashMap<>();
         valueList.put("isSecondAppear", isSecondAppear);
@@ -142,11 +139,5 @@ public class HTRouteController extends HTRouteFragment implements HTRouteReactRo
     public void onContentAppearToReactInstance(HTRouteReactRootView rootView) {
         progressBar.setVisibility(View.INVISIBLE);
         getView().removeView(progressBar);
-        if (componentRouteOptionList != null) {
-            Double backgroundColor = (Double) componentRouteOptionList.get("backgroundColor");
-            if (backgroundColor != null) {
-                getView().setBackgroundColor(backgroundColor.intValue());
-            }
-        }
     }
 }

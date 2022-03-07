@@ -41,13 +41,23 @@ public class HTRouteTabBar extends RelativeLayout {
         return 200 + index;
     }
 
+    public int containerId(int index) {
+        return 300 + index;
+    }
+
+    public int buttonId(int index) {
+        return 400 + index;
+    }
+
     public void reloadItemIndex(int index) {
         if (index >= 0 && index < delegate.itemCount()) {
             Boolean isSelected = index == selectedIndex;
+            ViewGroup container = (ViewGroup) findViewById(containerId(index));
+            TextView button = (TextView) findViewById(buttonId(index));
             ViewGroup imageContainer = (ViewGroup) findViewById(imageContainerId(index));
             TextView textView = (TextView) findViewById(textViewId(index));
             ImageView imageView = (ImageView) imageContainer.findViewById(0);
-            delegate.cellForIndex(imageContainer, imageView, textView, index, isSelected);
+            delegate.cellForIndex(container, button, imageContainer, imageView, textView, index, isSelected);
         }
     }
 
@@ -88,8 +98,10 @@ public class HTRouteTabBar extends RelativeLayout {
 
         for (int index = 0; index < delegate.itemCount(); index ++) {
             RelativeLayout relativeLayout = new RelativeLayout(getContext());
+            relativeLayout.setId(containerId(index));
 
             TextView button = new TextView(getContext());
+            button.setId(buttonId(index));
             button.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
             ((LayoutParams)(button.getLayoutParams())).addRule(CENTER_IN_PARENT);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

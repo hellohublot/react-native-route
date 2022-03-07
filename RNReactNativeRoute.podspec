@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.author             = { "author" => "author@domain.cn" }
   s.platform     = :ios, "9.0"
   s.source       = { :git => "https://github.com/author/RNReactNativeRoute.git", :tag => "master" }
-  s.source_files  = "Classes/*.{h,m}"
+  s.source_files  = "ios/Classes/*.{h,m}"
   s.requires_arc = true
 
 

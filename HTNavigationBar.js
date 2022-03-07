@@ -49,9 +49,14 @@ export default class HTNavigationBar extends Component {
 
 	render() {
 		return (
-			<View style={[styleList.navigationBar, this?.props?.style, this.props.float ? styleList.navigationBarFloat : null]}>
-				<Animated.View style={[styleList.navigationBarBackground, { backgroundColor: this.props.backgroundColor }, this.props.backgroundStyle]}>
+			<View style={[styleList.navigationBar, this?.props?.style, this.props.float ? {...StyleSheet.absoluteFill, ...styleList.navigationBarFloat} : null]}>
+				<Animated.View style={[StyleSheet.absoluteFill, styleList.navigationBarBackground, { backgroundColor: this.props.backgroundColor }, this.props.backgroundStyle]}>
 				</Animated.View>
+				<View style={StyleSheet.absoluteFill}>
+				{
+					this.props.backgroundView
+				}
+				</View>
 				{
 						
 					<View style={{ height: this?.props?.statusHeight ?? STATUS_BAR_HEIGHT }}></View>
@@ -62,10 +67,10 @@ export default class HTNavigationBar extends Component {
 				}
 				
 				<View style={[styleList.navigationContent, this?.props?.contentStyle]}>
-					<View style={styleList.navigationTitleContainer}>
+					<View style={[StyleSheet.absoluteFill, styleList.navigationTitleContainer]}>
 					 	<Text style={this.props.titleStyle} numberOfLines={1}>{ this.props.title }</Text>
 					</View>
-					<View style={styleList.navigationTitleView}>
+					<View style={[StyleSheet.absoluteFill, styleList.navigationTitleView]}>
 					 	{ this.props.titleView }
 					</View>
 
@@ -89,17 +94,10 @@ const styleList = StyleSheet.create({
 		zIndex: 10,
 	},
 	navigationBarFloat: {
-		position: 'absolute',
-		left: 0, 
-		right: 0, 
-		top: 0, 
+		bottom: null,
 	},
 	navigationBarBackground: {
-		position: 'absolute',
-		left: 0, 
-		right: 0, 
-		top: 0,
-		bottom: 0,
+
 	},
 	navigationContent: {
 		height: 44,
@@ -115,20 +113,12 @@ const styleList = StyleSheet.create({
 		alignItems: 'center',
 	},
 	navigationTitleView: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
 	navigationTitleContainer: {
-		position: 'absolute',
-		top: 0,
 		left: 80,
 		right: 80,
-		bottom: 0,
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
@@ -137,11 +127,5 @@ const styleList = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		alignItems: 'center',
-	},
-	navigationScanfImage: {
-
-	},
-	navigationMessageImage: {
-		marginLeft: 15,
 	},
 })

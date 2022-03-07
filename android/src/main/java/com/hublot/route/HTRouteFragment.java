@@ -6,14 +6,13 @@ import androidx.fragment.app.Fragment;
 import com.facebook.react.ReactRootView;
 import com.facebook.react.uimanager.ReactRoot;
 
-public abstract class HTRouteFragment extends Fragment {
+public abstract class HTRouteFragment {
 
     protected abstract ViewGroup createViewGroup();
 
     private ViewGroup _view;
 
     @Nullable
-    @Override
     public ViewGroup getView() {
         if (_view == null) {
             _view = createViewGroup();
@@ -25,8 +24,8 @@ public abstract class HTRouteFragment extends Fragment {
     public void dealloc() {
         try {
             this.getView().setTag(null);
+            this.getView().removeAllViews();
             _view = null;
-            this.finalize();
         } catch (Throwable throwable) {
             System.out.println("");
         }

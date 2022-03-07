@@ -91,7 +91,7 @@ RCT_EXPORT_METHOD(touchRouteData:(nonnull NSNumber *)reactTag routeData:(NSDicti
     } else if ([action isEqualToString:@"replace"]) {
         NSMutableArray *childControllerList = [navigationController.childViewControllers mutableCopy];
         NSInteger count = childControllerList.count;
-        if (count <= 1) {
+        if (count <= 0) {
             return;
         }
         UIViewController *routeController = toController;

@@ -25,7 +25,7 @@ public class HTRouteGlobal {
 
 
     public static int tabBarHeight() {
-        return dp2px(49);
+        return dp2px(66);
     }
 
     public static int dp2px(float dp) {
@@ -41,6 +41,22 @@ public class HTRouteGlobal {
             view = (View) view.getParent();
         }
         return (T) view.getTag();
+    }
+
+    public static <T> T lastController(ViewGroup target, Class<T> cls) {
+        if (cls.isInstance(target.getTag())) {
+            return (T) target.getTag();
+        }
+        for (int index = 0; index < target.getChildCount(); index ++) {
+            View view = target.getChildAt(index);
+            if (view instanceof ViewGroup) {
+                T controller = lastController((ViewGroup) view, cls);
+                if (controller != null) {
+                    return controller;
+                }
+            }
+        }
+        return null;
     }
 
     public static String getProp(String name) {
