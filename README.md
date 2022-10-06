@@ -1,16 +1,18 @@
-- 纯原生的导航跳转组件
-- 转场动画, 点击导航返回按钮和点击最下面标签 TabBar 都是原生的事件, 性能做到和原生一致
-- 给 HTRouteView 绑定页面参数, 当点击的时候直接原生响应跳转绑定的页面
-- 支持 presentModalController 模态弹出页面, 可以自定义弹出的页面大小动画等等
-- 支持 componentDidAppear componentDidDisappear 生命周期
-- 支持每个页面的 AOP 日志收集
-- 留出来的接口和 react-navigation 一致, 方便切换
+## Features
+
+- Pure native navigation for route
+- Transition animation, clicking the navigation back button and clicking the bottom tab TabBar are all native events, and the performance is consistent with the native one
+- Bind page parameters to HTRouteView, and will navigate to the page when clicked without javascript call
+- Support presentModalController modal pop-up page, you can customize the pop-up page size and animation, etc.
+- Support componentDidAppear componentDidDisappear lifecycle
+- Supports AOP log collection each page
+- The interface is same as `react-navigation`, which is convenient for switching
 
 <img src="./example/1.gif" width="300">
 
 ## Usage
 
-[点击查看完整示例 Example](./example/app/App.js)
+[Example](./example/app/App.js)
 
 ```bash
 yarn add 'https://github.com/hellohublot/react-native-route.git'
