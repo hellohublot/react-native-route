@@ -1,10 +1,11 @@
 ## Features
 
-- Pure native navigation for route
-- Transition animation, clicking the navigation back button and clicking the bottom tab TabBar are all native events, and the performance is consistent with the native one
-- Bind page parameters to HTRouteView, and will navigate to the page when clicked without javascript call
+- Pure `native navigation` for routing
+- Transition animation, clicking the navigation back button and clicking the bottom tab TabBar are all `native animation and events`
+- The `performance` is same as native app
+- Bind page parameters to HTRouteView, and will navigate to the page when clicked `without javascript call`
 - Support presentModalController modal pop-up page, you can customize the pop-up page size and animation, etc.
-- Support componentDidAppear componentDidDisappear lifecycle
+- Support `componentDidAppear` `componentDidDisappear` lifecycle
 - Supports AOP log collection each page
 - The interface is same as `react-navigation`, which is convenient for switching
 
