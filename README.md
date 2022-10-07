@@ -118,13 +118,6 @@ public void invokeDefaultOnBackPressed() {
 	}
 }
 ```
-### Android.res.value.style.xml
-```xml
-<style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-	// fullscreen
-	<item name="android:windowTranslucentStatus">true</item>
-</style>
-```
 
 #### App.js
 ```javascript
