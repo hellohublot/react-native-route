@@ -30,10 +30,11 @@ public class HTRouteManager extends ReactContextBaseJavaModule {
                 } else {
                     navigationController = HTRouteGlobal.lastController(rootView, HTRouteNavigationController.class);
                 }
+                HTRouteController controller = null;
                 if (navigationController != null) {
-                    HTRouteController controller = navigationController.childControllerList.get(0);
-                    HTRouteViewManager.handlerRouteDataWithController(controller, routeData.toHashMap());
+                    controller = navigationController.childControllerList.get(0);
                 }
+                HTRouteViewManager.handlerRouteDataWithController(controller, routeData.toHashMap());
             }
         });
     }

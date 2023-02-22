@@ -135,7 +135,7 @@ public class HTRouteTabBar extends RelativeLayout {
             ((RelativeLayout.LayoutParams)textView.getLayoutParams()).addRule(RelativeLayout.CENTER_HORIZONTAL);
             ((RelativeLayout.LayoutParams)textView.getLayoutParams()).addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
             ((RelativeLayout.LayoutParams)imageContainer.getLayoutParams()).addRule(RelativeLayout.ABOVE, textView.getId());
-            textView.setPadding(0, HTRouteGlobal.dp2px(3), 0, HTRouteGlobal.dp2px(1.5f));
+            textView.setPadding(0, HTRouteGlobal.dp2px(5f), 0, HTRouteGlobal.dp2px(10f));
             final int finalIndex = index;
             button.setOnClickListener(new OnClickListener() {
                 @Override

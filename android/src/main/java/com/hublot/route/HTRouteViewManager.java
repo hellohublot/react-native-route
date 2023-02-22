@@ -50,7 +50,7 @@ public class HTRouteViewManager extends ReactViewManager {
         if (presentView == null) {
             presentView = new RelativeLayout(HTRouteGlobal.activity);
             presentView.setId(id);
-            rootView.addView(presentView, HTRouteGlobal.matchParent);
+            rootView.addView(presentView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         }
         return presentView;
     }
@@ -66,8 +66,12 @@ public class HTRouteViewManager extends ReactViewManager {
             animated = true;
         }
         Map<String, Serializable> componentRouteOptionList = (Map<String, Serializable>) routeData.get("componentRouteOptionList");
-        HTRouteNavigationController navigationController = HTRouteGlobal.nextController(controller.getView(), HTRouteNavigationController.class);
-        HTRouteTabBarController tabBarController = HTRouteGlobal.nextController(controller.getView(), HTRouteTabBarController.class);
+        HTRouteNavigationController navigationController = null;
+        HTRouteTabBarController tabBarController = null;
+        if (controller != null) {
+        	navigationController = HTRouteGlobal.nextController(controller.getView(), HTRouteNavigationController.class);
+        	tabBarController = HTRouteGlobal.nextController(controller.getView(), HTRouteTabBarController.class);
+        }
 
         Double presentEdgeTop = (Double) componentRouteOptionList.get("presentEdgeTop");
         if (presentEdgeTop == null) {
@@ -78,22 +82,27 @@ public class HTRouteViewManager extends ReactViewManager {
         if (presentAnimatedDuration == null) {
             presentAnimatedDuration = (double)250;
         }
+        if (animated == false) {
+        	presentAnimatedDuration = (double) 0;
+        }
 
         if (action.equals("push") || action.equals("navigate")) {
             if (action.equals("navigate")) {
-                for (HTRouteTabBarModel model: tabBarController.modelList) {
-                    if (!(model.fragment instanceof HTRouteNavigationController)) {
-                        continue;
-                    }
-                    HTRouteNavigationController tabNavigationController = (HTRouteNavigationController) model.fragment;
-                    HTRouteController routeController = tabNavigationController.childControllerList.get(0);
-                    if (routeController.componentName.equals(componentName)) {
-                        navigationController.popToRootViewControllerAnimated(false);
-                        tabNavigationController.popToRootViewControllerAnimated(false);
-                        tabBarController.reloadSelectedViewController(tabNavigationController);
-                        return;
-                    }
-                }
+            	if (tabBarController != null) {
+            		for (HTRouteTabBarModel model: tabBarController.modelList) {
+	                    if (!(model.fragment instanceof HTRouteNavigationController)) {
+	                        continue;
+	                    }
+	                    HTRouteNavigationController tabNavigationController = (HTRouteNavigationController) model.fragment;
+	                    HTRouteController routeController = tabNavigationController.childControllerList.get(0);
+	                    if (routeController.componentName.equals(componentName)) {
+	                        navigationController.popToRootViewControllerAnimated(false);
+	                        tabNavigationController.popToRootViewControllerAnimated(false);
+	                        tabBarController.reloadSelectedViewController(tabNavigationController);
+	                        return;
+	                    }
+	                }
+            	}
                 for (HTRouteController childController: navigationController.childControllerList) {
                     if (childController.componentName.equals(componentName)) {
                         navigationController.popToViewController(childController, animated);

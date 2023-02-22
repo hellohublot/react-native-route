@@ -38,9 +38,6 @@ RCT_EXPORT_MODULE()
             navigationController = (UINavigationController *)[[self class] findController:rootController controllerClass:[UINavigationController class]];
         }
         UIViewController *controller = navigationController.visibleViewController;
-        if (!controller) {
-            return;
-        }
         [HTRouteViewManager handlerRouteDataWithController:controller toController:toController routeData:routeData];
     });
 }

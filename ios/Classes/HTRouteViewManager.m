@@ -75,7 +75,7 @@ RCT_EXPORT_METHOD(touchRouteData:(nonnull NSNumber *)reactTag routeData:(NSDicti
                 }
                 HTRouteController *routeController = (HTRouteController *)viewController;
                 if ([routeController.componentName isEqualToString:componentName]) {
-                    [controller.navigationController popToViewController:routeController animated:animated];
+                    [navigationController popToViewController:routeController animated:animated];
                     return;
                 }
             }
@@ -87,7 +87,7 @@ RCT_EXPORT_METHOD(touchRouteData:(nonnull NSNumber *)reactTag routeData:(NSDicti
         if (navigationController.childViewControllers.count >= 1) {
             routeController.hidesBottomBarWhenPushed = true;
         }
-        [controller.navigationController pushViewController:routeController animated:animated];
+        [navigationController pushViewController:routeController animated:animated];
     } else if ([action isEqualToString:@"replace"]) {
         NSMutableArray *childControllerList = [navigationController.childViewControllers mutableCopy];
         NSInteger count = childControllerList.count;

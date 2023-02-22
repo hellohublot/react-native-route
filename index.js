@@ -32,7 +32,7 @@ const encodeRouteData = (routeData, navigation) => {
 		...componentRouteOptionList,
 	}
 
-	if (componentName && !globalValue.registerList[componentName]) {
+	if (typeof(componentName) == 'string' && !globalValue.registerList[componentName]) {
 		return null
 	}
 
@@ -101,6 +101,9 @@ const createNavigationWithRootRefFunction = (rootRefFunction, props) => {
 				componentRouteOptionList,
 				animated
 			}
+			if (typeof(routeData.componentName) == 'object') {
+				routeData.componentName = undefined
+			}
 			DeviceEventEmitter.emit('onHTRouteEvent', { title: 'navigation', value: routeData })
 			routeData = encodeRouteData(routeData, navigation)
 			if (!routeData) {
@@ -139,15 +142,17 @@ const createNavigationWithRootRefFunction = (rootRefFunction, props) => {
 
 
 
-	let componentPropList = decodeRouteData(props).componentPropList ?? {}
-	navigation['state'] = {}
-	navigation['state'].params = componentPropList
+	var componentPropList = decodeRouteData(props).componentPropList ?? {}
+	componentPropList = {...componentPropList}
+	navigation['state'] = { params: componentPropList }
 	navigation['getParam'] = (key, defaultValue) => {
 		let value = componentPropList[key]
 		return value ?? defaultValue
 	}
-	navigation['setParams'] = (key, value) => {
-		componentPropList[key] = value
+	navigation['setParams'] = (keyValueList = {}) => {
+		Object.keys(keyValueList).map(key => {
+			componentPropList[key] = keyValueList[key]
+		})
 	}
 
 
@@ -193,6 +198,12 @@ class HTRouteComponent extends Component {
 	constructor(props) {
 		super(props)
 		let navigation = createNavigationWithRootRefFunction(() => this.rootRef, props)
+		
+		let originSetParams = navigation.setParams
+		navigation.setParams = (keyValueList) => {
+			originSetParams(keyValueList)
+			this.forceUpdate()
+		}
 
 		this.reloadProps = { ...props, navigation }
 
@@ -220,7 +231,12 @@ class HTRouteComponent extends Component {
 				{ 
 					HTRouteManager.defaultRouteNavigationRender(this.reloadProps)
 				}
-				<ComponentClass ref={bindRef} getRef={bindRef} navigation={this.reloadProps.navigation} />
+				<ComponentClass 
+					ref={bindRef} 
+					getRef={bindRef} 
+					navigation={this.reloadProps.navigation} 
+					route={this.reloadProps.navigation['state']} 
+				/>
 			</HTRouteView>
 		)
 	}
