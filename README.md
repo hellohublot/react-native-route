@@ -13,28 +13,23 @@ react-native-route is an extreme performance react-native navigation library, It
 - [x] Have the NativigationBar component, which can be directly inherited or used globally
 - [x] Support global observation of navigation events, more convenient log statistics
 
-## Usage
-
-[View Example](./example/app/App.js)
+## Install
 
 ```bash
 yarn add 'https://github.com/hellohublot/react-native-route.git'
 ```
+
+## Usage
+[View Full Example](./example/app/App.js)
+
+In order to be compatible with the diversity of startup navigation, and the performance considerations of UITabBarItem click events, we put all startups in the native
 #### iOS
+You can use native NavigationController and UITabBarController, and FDFullscreenPopGesture has been integrated, We use moduleName to preload bundle
 ```objective-c
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-
 	...
-
 	[HTRouteBridgeManager loadBridgeWithURL:[self sourceURLForBridge:nil] moduleName:@"ReactNativeDemo" launchOptions:launchOptions];
-
-	UITabBarController *tabBarController = [[UITabBarController alloc] init];
-	tabBarController.tabBar.backgroundColor = [UIColor whiteColor];
-
-	NSString *titleKey = @"title";
-	NSString *imageKey = @"image";
-	NSString *selectedImageKey = @"selectedImageKey";
-	NSString *componentKey = @"component";
+	...
 	NSArray *keyValueList = @[
 		@{ titleKey: @"Home", imageKey: @"tabbar_home", selectedImageKey: @"tabbar_home_selected", componentKey: @"Home" },
 		@{ titleKey: @"Mine", imageKey: @"tabbar_mine", selectedImageKey: @"tabbar_mine_selected", componentKey: @"Mine" },
@@ -43,26 +38,14 @@ yarn add 'https://github.com/hellohublot/react-native-route.git'
 		HTRouteController *routeController = [HTRouteController controllerWithComponentName:dictionary[componentKey] componentRouteOptionList:@{@"id": [NSString stringWithFormat:@"%ld", index]}];
 		UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:routeController];
 		navigationController.fd_viewControllerBasedNavigationBarAppearanceEnabled = false;
-		[tabBarController addChildViewController:navigationController];
-
-		routeController.tabBarItem.title = dictionary[titleKey];
-		routeController.tabBarItem.image = [[UIImage imageNamed:dictionary[imageKey]] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
-		routeController.tabBarItem.selectedImage = [[UIImage imageNamed:dictionary[selectedImageKey]] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+		...
 	}];
-
-	UIViewController *rootViewController = [[UIViewController alloc] init];
-	rootViewController.view.backgroundColor = [UIColor whiteColor];
-	[rootViewController addChildViewController:tabBarController];
-	[rootViewController.view addSubview:tabBarController.view];
-	[tabBarController didMoveToParentViewController:rootViewController];
-
-	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-	self.window.rootViewController = rootViewController;
-	[self.window makeKeyAndVisible];
+	...
 	return YES;
 }
 ```
 #### Android.MainApplication
+We use moduleName to preload bundle
 ```java
 	public void onCreate() {
 		super.onCreate();
@@ -73,6 +56,7 @@ yarn add 'https://github.com/hellohublot/react-native-route.git'
 	}
 ```
 #### Android.MainActivity
+We handle the back button in invokeDefaultOnBackPressed
 ```java
 private HTRouteTabBarController tabBarController;
 
@@ -102,10 +86,7 @@ private void setReactNativeContentView() {
 			    new HTRouteTabBarModel("Home", R.mipmap.tabbar_home, R.mipmap.tabbar_home_selected,
 			        new HTRouteNavigationController(new HTRouteController("Home", createComponentRouteOption())))
 			);
-			modelList.add(
-			    new HTRouteTabBarModel("Mine", R.mipmap.tabbar_mine, R.mipmap.tabbar_mine_selected,
-			        new HTRouteNavigationController(new HTRouteController("Mine", createComponentRouteOption())))
-			);
+			...
 		}
 	};
 	setContentView(this.tabBarController.getView());
@@ -123,6 +104,7 @@ public void invokeDefaultOnBackPressed() {
 ```
 
 #### App.js
+We can handle the parameters of Component.Static by ourselves
 ```javascript
 import { HTRouteManager, HTRouteComponent, HTRouteView, HTNavigationBar } from 'react-native-route'
 
@@ -132,14 +114,7 @@ HTRouteManager.register({
 })
 HTRouteManager.defaultRouteNavigationRender = (props) => {
 	const readComponentOptionsFromProps = (props) => {
-		let componentClass = HTRouteManager.readRegisterFunction(props)()
-		let navigationOptions = componentClass?.navigationOptions ?? {}
-		if (typeof(navigationOptions) == 'function') {
-			let _navigationOptions = navigationOptions(props) ?? {}
-			navigationOptions = _navigationOptions
-		}
-		navigationOptions = { ...navigationOptions }
-		return navigationOptions
+		...
 	}
 	let navigationOptions = readComponentOptionsFromProps(props)
 
@@ -156,16 +131,7 @@ HTRouteManager.defaultRouteNavigationRender = (props) => {
 			<Image source={require('~/img/back_white.png')} />
 		</HTRouteView>
 	]
-	if (navigationOptions.header_left) {
-		leftItemList = [ navigationOptions.header_left ]
-	}
-
-	// title
-	if (!navigationOptions.title) {
-		navigationOptions.title = navigationOptions.headerTitle
-	}
-	navigationOptions.backgroundColor = navigationOptions.headerBackgroundColor
-	
+	...
 
 	return (
 		<HTNavigationBar
