@@ -18,7 +18,7 @@ react-native-native-route is an extreme performance react-native navigation libr
 [View Example](./example/app/App.js)
 
 ```bash
-yarn add 'https://github.com/hellohublot/react-native-route.git'
+yarn add 'https://github.com/hellohublot/react-native-native-route.git'
 ```
 #### iOS
 ```objective-c
@@ -124,7 +124,7 @@ public void invokeDefaultOnBackPressed() {
 
 #### App.js
 ```javascript
-import { HTRouteManager, HTRouteComponent, HTRouteView, HTNavigationBar } from 'react-native-route'
+import { HTRouteManager, HTRouteComponent, HTRouteView, HTNavigationBar } from 'react-native-native-route'
 
 HTRouteManager.register({
 	'Home': () => require('~/page/Home').default,
