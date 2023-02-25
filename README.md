@@ -158,6 +158,6 @@ export default class App extends Component {
 
 ```
 
-## Author
+## Contact
 
 hellohublot, hublot@aliyun.com
