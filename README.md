@@ -1,19 +1,21 @@
-## Features
-
-- Pure `native navigation` for routing
-- Transition animation, clicking the navigation back button and clicking the bottom tab TabBar are all `native animation and events`
-- The `performance` is same as native app
-- Bind page parameters to HTRouteView, and will navigate to the page when clicked `without javascript call`
-- Support presentModalController modal pop-up page, you can customize the pop-up page size and animation, etc.
-- Support `componentDidAppear` `componentDidDisappear` lifecycle
-- Supports AOP log collection each page
-- The interface is same as `react-navigation`, which is convenient for switching
+## react-native-native-route
+react-native-native-route is an extreme performance react-native navigation library, It uses native animations and gestures, so it can give you the best performance experience as native apps
 
 <img src="./example/1.gif" width="300">
 
+## Features
+
+- [x] Support the same interface as react-navigation, so you can switch between them
+- [x] Support global navigation variables, so navigation can be used anywhere
+- [x] Support customizable modal pop-up windows, pop-up windows also support navigation
+- [x] Support Component life cycle, no need to observe, directly overload the life cycle method
+- [x] Have the Route component, direct navigation after clicking no longer requires thread asynchronous communication
+- [x] Have the NativigationBar component, which can be directly inherited or used globally
+- [x] Support global observation of navigation events, more convenient log statistics
+
 ## Usage
 
-[Example](./example/app/App.js)
+[View Example](./example/app/App.js)
 
 ```bash
 yarn add 'https://github.com/hellohublot/react-native-route.git'
